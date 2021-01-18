@@ -1,6 +1,7 @@
 # Description
 
-OccuSim is a versatile Occupation Simulator for the [AppDaemon](https://github.com/acockburn/appdaemon) Platform.
+This is a fork of Occupation Simulator for the [AppDaemon](https://github.com/acockburn/appdaemon) Platform.
+OccuSim is a versatile Occupation Simulator.  This fork changes the way random events are created and set up.
 
 # Installation
 
@@ -67,6 +68,7 @@ By Contrast, Random Operation attempts to turn various lights on and off at rand
 
 To set up a random event, it is first necessary to define 2 steps to act as the start and end times for the random activity. The steps themselves need not do turn anything on or off, they are there as markers. As with the steps described above, the parameters have a pattern of `random_<random_name>` to group the parameters together.
 
+Between the start and stop times a number of event points are created separated by a time more than minduration and less than maxduration.  
 To define a random event, use the following parameters:
 
 - `random_<random_name>_name` - A printable name for the Step e.g. `Morning` or `Bedtime`
@@ -74,11 +76,9 @@ To define a random event, use the following parameters:
 - `random_<random_name>_end` - Name of a defined step that is the end of the range of randomness for this event.
 - `random_<random_name>_minduration` - Minimum duration of the event
 - `random_<random_name>_maxduration` - Maximum duration of the event
-- `random_<random_name>_number` - Number of times within the period to fire the event
-- `random_<random_name>_on_<name>` - An entity to turn on at the start of the event period. This can be anything that home assistant can turn on with its `homeassistant/turn_on` service - a light, a script or a scene. It is possible to have multiples of this parameter, however <name> must be unique for each one - it is easiest just to use numbers.
-- `random_<random_name>_off_<name>` - An entity to turn off at the end of the event period. This can be anything that home assistant can turn off with its `homeassistant/turn_off` service - a light, a script or a scene. If a scene is used here, `OccuSim` is smart enough to turn it on rather than off. It is possible to have multiples of this parameter, however <name> must be unique for each one - it is easiest just to use numbers.
-
-Random events are not guaranteed to not overlap, however this can add additional randomness to the operation so is not a bad thing.
+- `random_<random_name>_on_<name>` - An entity to turn on at the odd alternate event point (i.e.1, 3, 5 etc). This can be anything that home assistant can turn on with its `homeassistant/turn_on` service - a light, a script or a scene. It is possible to have multiples of this parameter, however <name> must be unique for each one - it is easiest just to use numbers.
+- `random_<random_name>_off_<name>` - An entity to turn off at the even alternate event points (i.e. 2, 4, 6 etc) . This can be anything that home assistant can turn off with its `homeassistant/turn_off` service - a light, a script or a scene. If a scene is used here, `OccuSim` is smart enough to turn it on rather than off. It is possible to have multiples of this parameter, however <name> must be unique for each one - it is easiest just to use numbers.
+- `random_<random_name>_tgl_<name>` - An entity to toggle on/off at each of the event points. This can be anything that home assistant can toggle with its `homeassistant/toggle` service - a light or switch. It is possible to have multiples of this parameter, however <name> must be unique for each one - it is easiest just to use numbers.
 
 ## input_selects and events
 

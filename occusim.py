@@ -153,43 +153,49 @@ class OccuSim(hass.Hass):
 
             span = 0
             for arg in self.args:
-                if re.match(step + "on", arg):
+                if re.match(step + "(on|tgl)", arg):
                     cbonargs[arg] = self.args[arg]
-                if re.match(step + "off", arg):
+                if re.match(step + "(off|tgl)", arg):
                     cboffargs[arg] = self.args[arg]
 
             startstep = self.args[step + "start"]
             endstep = self.args[step + "end"]
             starttime = events[startstep]["event"]
             endtime = events[endstep]["event"]
+            
             tspan = int(endtime.timestamp() - starttime.timestamp())
 
             mind_p = self.args[step + "minduration"]
             mind = self.parse_time(mind_p)
             mindts = datetime.datetime.combine(self.date(), mind).timestamp()
             mindtsdur = mindts - datetime.datetime.combine(self.date(), mind).replace(hour=0, minute=0, second=0).timestamp()
+            mins = datetime.timedelta(seconds=mindtsdur)
+            # self.log("minsdur {} {}".format(mindtsdur, mindts))
             maxd_p = self.args[step + "maxduration"]
             maxd = self.parse_time(maxd_p)
             maxdts = datetime.datetime.combine(self.date(), maxd).timestamp()
             dspan = int(maxdts - mindts)
+            
+            # self.log("dspan {} ".format(dspan))
 
-            for i in range(int(self.args[step + "number"])):
-                start = starttime + datetime.timedelta(seconds=random.randrange(tspan))
-                end = start + datetime.timedelta(seconds=random.randrange(dspan)) + datetime.timedelta(seconds=mindtsdur)
-                if end > endtime:
-                    end = endtime
-
-                eventname = stepname + "_on_" + str(i)
+            delta = datetime.timedelta(seconds=random.randrange(dspan))
+            next = starttime +  delta + mins
+            # self.log("next {} {} ".format(delta, next))
+            i = 1
+            while next < endtime:
+                eventname = stepname + "_" + str(i)
                 events[eventname] = {}
-                events[eventname]["event"] = start
-                cbonargs["step"] = eventname
-                events[eventname]["args"] = cbonargs.copy()
-
-                eventname = stepname + "_off_" + str(i)
-                events[eventname] = {}
-                events[eventname]["event"] = end
-                cboffargs["step"] = eventname
-                events[eventname]["args"] = cboffargs.copy()
+                events[eventname]["event"] = next
+                if (i % 2) == 0: # even
+                    cboffargs["step"] = eventname
+                    events[eventname]["args"] = cboffargs.copy()
+                else:            # odd
+                    cbonargs["step"] = eventname
+                    events[eventname]["args"] = cbonargs.copy()
+                delta = datetime.timedelta(seconds=random.randrange(dspan))
+                next = next  +  delta + mins
+                i += 1
+                # self.log("next {} {} ".format(delta, next))
 
         # Take all the events we found and schedule them
 
@@ -220,6 +226,8 @@ class OccuSim(hass.Hass):
                 self.activate(kwargs[arg], "on")
             elif re.match(".+_off_.+", arg):
                 self.activate(kwargs[arg], "off")
+            elif re.match(".+_tgl_.+", arg):
+                self.activate(kwargs[arg], "toggle")
 
     def activate(self, entity, action):
         type = action
@@ -241,8 +249,12 @@ class OccuSim(hass.Hass):
                 type = "on"
                 if not self.test: self.turn_on(entity)
             else:
-                if not self.test: self.turn_off(entity)
-
+                if not self.test:
+                    if type == "off":
+                        self.turn_off(entity)
+                    else:
+                        self.toggle(entity)
+                        
         if "log" in self.args:
             self.log("turned {} {}".format(type, entity))
 
@@ -250,6 +262,6 @@ class OccuSim(hass.Hass):
         if "log_msg" in self.args:
             self.log(message)
         if "notify" in self.args:
-            self.notify(message)
-
+#            self.notify(message)
+            self.set_state("sensor.notify_message", state=message)	
 

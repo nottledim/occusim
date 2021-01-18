@@ -1,0 +1,35 @@
+Occupancy Simulator:
+  class: OccuSim
+  module: occusim
+  log_msg: '1'
+  notify: '1'
+#  enable: input_boolean.vacation,on
+#  test: '1'
+  dump_times: '1'
+  reset_time: "15:00:00"
+
+  step_evening_name: Evening
+  step_evening_start: sunset + 00:05:00
+  step_evening_on_lamp: switch.ikea_sw02
+  step_evening_on_hugh: light.hugh
+  
+  step_night_name: Night
+  step_night_start: "23:25:00"
+  step_night_off_lamp: switch.ikea_sw02
+  step_night_off_hugh: light.hugh
+  
+  random_occu_name: Lamp
+  random_occu_start: Evening
+  random_occu_end: Night
+  random_occu_minduration: 00:10:00
+  random_occu_maxduration: 00:55:00
+  random_occu_tgl_lamp: switch.ikea_sw02
+
+#
+#  random_testy_name: Testy
+#  random_testy_start: Evening
+#  random_testy_end: Night
+#  random_testy_minduration: 00:05:00
+#  random_testy_maxduration: 00:30:00
+#  random_testy_tgl_hugh: light.hugh
+#
